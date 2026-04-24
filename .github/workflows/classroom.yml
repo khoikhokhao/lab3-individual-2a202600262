@@ -1,0 +1,30 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: 'Criteria 1: Execution'
+      id: criteria-1-execution
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: 'Criteria 1: Execution'
+        setup-command: pip install pytest pydantic
+        command: pytest tests/test_lab.py -k "test_execution"
+        timeout: 10
+        max-score: 100
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        CRITERIA-1-EXECUTION_RESULTS: "${{steps.criteria-1-execution.outputs.result}}"
+      with:
+        runners: criteria-1-execution
